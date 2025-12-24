@@ -1,0 +1,34 @@
+name: Daily Traffic Fine Check
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every day
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  check_fines:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Traffic Script
+        env:
+          PLATE_CHAR_1: ${{ secrets.PLATE_CHAR_1 }}
+          PLATE_CHAR_2: ${{ secrets.PLATE_CHAR_2 }}
+          PLATE_CHAR_3: ${{ secrets.PLATE_CHAR_3 }}
+          PLATE_NUMS:   ${{ secrets.PLATE_NUMS }}
+          NATIONAL_ID:  ${{ secrets.NATIONAL_ID }}
+          PHONE_NUMBER: ${{ secrets.PHONE_NUMBER }}
+        run: python traffic_check.py
