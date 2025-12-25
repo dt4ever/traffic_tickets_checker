@@ -11,6 +11,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 # --- Configuration ---
 TARGET_URL = "https://ppo.gov.eg/ppo/r/ppoportal/ppoportal/traffic"
 
+# --- PROXY CONFIGURATION ---
+# We inject the proxy you provided
+PROXY = "156.200.116.70:1981" 
+
 # --- Load Secrets from Environment Variables ---
 try:
     PLATE_CHAR_1 = os.environ["PLATE_CHAR_1"]
@@ -34,19 +38,25 @@ ID_PHONE_INPUT  = "P7_PHONE_NUMBER_ID_CASE_1"
 ID_BTN_CHECK_DETAILS = "B1776099686727570788"
 
 def check_traffic_fines():
-    # --- Headless Chrome Setup ---
+    # --- Headless Chrome Setup with PROXY ---
     options = webdriver.ChromeOptions()
     options.add_argument("--headless") 
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
     
+    # ADDING THE PROXY HERE
+    print(f"Configuration: Using Proxy {PROXY}")
+    options.add_argument(f'--proxy-server={PROXY}')
+    
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     try:
         print("1. Opening website...")
+        # We set a shorter timeout for the page load to fail fast if proxy is dead
+        driver.set_page_load_timeout(60) 
         driver.get(TARGET_URL)
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 30) # Increased wait time for slower proxy connections
 
         # --- STEP 1: Enter License Plate ---
         print("2. Entering License Plate...")
@@ -95,6 +105,9 @@ def check_traffic_fines():
 
     except Exception as e:
         print(f"Error occurred: {e}")
+        # Helpful message if proxy fails
+        if "ERR_PROXY_CONNECTION_FAILED" in str(e) or "ERR_CONNECTION_TIMED_OUT" in str(e):
+            print("::warning::The Proxy failed to connect. Try a different proxy IP.")
         sys.exit(1)
     finally:
         driver.quit()
