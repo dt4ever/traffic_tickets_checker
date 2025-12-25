@@ -13,7 +13,7 @@ TARGET_URL = "https://ppo.gov.eg/ppo/r/ppoportal/ppoportal/traffic"
 
 # --- PROXY CONFIGURATION ---
 # We inject the proxy you provided
-PROXY = "156.200.116.70:1981" 
+PROXY = "41.65.160.173:1976" 
 
 # --- Load Secrets from Environment Variables ---
 try:
@@ -114,3 +114,4 @@ def check_traffic_fines():
 
 if __name__ == "__main__":
     check_traffic_fines()
+
